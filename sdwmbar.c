@@ -19,6 +19,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+/* Needed for getversion() */
+#include <string.h>
+
 /* Needed for snprintf() */
 #include <stdio.h>
 
@@ -33,9 +36,32 @@
 #include <X11/Xlib.h>
 
 void
-printerr(char *err) {
+printerr(char *err) 
+{
 	fprintf(stderr, "%s\n", err);
 	exit(1);
+}
+
+char *
+getversion(void)
+{
+	FILE *fp;
+	
+	fp = popen("dwm -v 2>&1", "r");
+	if (!fp)
+		printerr("No dwm binary found!");
+
+	char *buff = malloc(10);
+	if (!buff)
+		printerr("Unable to allocate memory! (getversion)");
+	
+	fgets(buff, 10, fp);
+	fclose(fp);
+
+	/* Remove the trailing newline */
+	buff[strcspn(buff, "\n")] = 0;
+
+	return buff;
 }
 
 char *
@@ -100,15 +126,19 @@ main(void)
 	char status[100];
 	char *load;
 	char *time;
+	char *version;
 	int  batt;
+
+	/* Only need to get version once */
+	version = getversion();
 
 	for (;;sleep(10)) {
 		load = getload();
 		time = gettime();
 		batt = getbatt();
 
-		snprintf(status, 100, "dwm 6.1  L:%s  %s  %d%%",
-				      load, time, batt);
+		snprintf(status, 100, "%s  L:%s  %s  %d%%",
+				      version, load, time, batt);
 		setstatus(status);
 		free(load);
 		free(time);
