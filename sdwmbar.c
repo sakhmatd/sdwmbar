@@ -49,11 +49,11 @@ getversion(void)
 	
 	fp = popen("dwm -v 2>&1", "r");
 	if (!fp)
-		printerr("No dwm binary found!");
+		printerr("sdwmbar: no dwm binary found!");
 
 	char *buff = malloc(10);
 	if (!buff)
-		printerr("Unable to allocate memory! (getversion)");
+		printerr("sdwmbar: unable to allocate memory! (getversion)");
 	
 	fgets(buff, 10, fp);
 	fclose(fp);
