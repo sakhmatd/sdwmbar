@@ -144,6 +144,8 @@ main(void)
 		free(time);
 	}
 
+	free(version);
+
 	return 0;
 }
 
