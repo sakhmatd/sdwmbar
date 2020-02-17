@@ -128,17 +128,28 @@ main(void)
 	char *time;
 	char *version;
 	int  batt;
+	int  hasbatt = 1;
 
 	/* Only need to get version once */
 	version = getversion();
 
+	/* getbatt() returns 0 if no battery exists */
+	if (getbatt() == 0)
+		hasbatt = 0;
+
 	for (;;sleep(10)) {
 		load = getload();
 		time = gettime();
-		batt = getbatt();
 
-		snprintf(status, 100, "%s  L:%s  %s  %d%%",
-				      version, load, time, batt);
+		if (hasbatt) {
+			batt = getbatt();
+			snprintf(status, 100, "%s  L:%s  %s  %d%%",
+					version, load, time, batt);
+		} else {
+			snprintf(status, 100, "%s  L:%s  %s",
+					version, load, time);
+		}
+
 		setstatus(status);
 		free(load);
 		free(time);
