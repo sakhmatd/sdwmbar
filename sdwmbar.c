@@ -35,6 +35,11 @@
 /* Needed to set the statusbar */
 #include <X11/Xlib.h>
 
+#define STAT_LEN 100
+#define VRSN_LEN 10
+#define TIME_LEN 65
+#define LOAD_LEN 20
+
 void
 printerr(char *err) 
 {
@@ -42,59 +47,57 @@ printerr(char *err)
 	exit(1);
 }
 
-char *
-getversion(void)
+void
+getversion(char *buff)
 {
 	FILE *fp;
 	
 	fp = popen("dwm -v 2>&1", "r");
 	if (!fp)
 		printerr("sdwmbar: no dwm binary found!");
-
-	char *buff = malloc(10);
-	if (!buff)
-		printerr("sdwmbar: unable to allocate memory! (getversion)");
 	
-	fgets(buff, 10, fp);
+	fgets(buff, VRSN_LEN, fp);
 	fclose(fp);
 
 	/* Remove the trailing newline */
 	buff[strcspn(buff, "\n")] = 0;
-
-	return buff;
 }
 
-char *
-gettime(void)
+void
+gettime(char *buff)
 {
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
 	if (!tm)
 		printerr("sdwmbar: unable to get time (localtime)!");
 	
-	char *buff = malloc(65);
-	if (!buff)
-		printerr("sdwmbar: unable to allocate memory! (gettime)");
-	
-	if (!strftime(buff, 65, "%D  %R", tm))
+	if (!strftime(buff, TIME_LEN, "%D  %R", tm))
 		printerr("sdwmbar: unable to get time (strftime)!");
-	
-	return buff;
 }
 
 int
-getbatt(void)
+getbatt(int *buff)
 {
-	int buff = 0;
 	size_t len = sizeof(buff);
-	int ret = sysctlbyname("hw.acpi.battery.life", &buff, &len, NULL, 0);
+	int ret = sysctlbyname("hw.acpi.battery.life", buff, &len, NULL, 0);
 	
 	if (ret < 0) {
 		fprintf(stderr, "WARN: No battery was detected.\n");
 		return 0;
 	} else {
-		return buff;
+		return 1;
 	}
+}
+
+void
+getload(char *buff)
+{
+	double results[3];
+
+	if (getloadavg(results, 3) < 0)
+		printerr("sdwmbar: unable to get load data!");
+       
+	snprintf(buff, LOAD_LEN, "%.2f %.2f %.2f", results[0], results[1], results[2]);
 }
 
 void
@@ -110,45 +113,30 @@ setstatus(char *status)
 	XCloseDisplay(display);
 }
 
-char *
-getload(void)
-{
-	double results[3];
-	char   *buff = malloc(20);
-	if (!buff)
-		printerr("sdwmbar: unable to allocate memory (getload)!");
-
-	if (getloadavg(results, 3) < 0)
-		printerr("sdwmbar: unable to get load data!");
-       
-	snprintf(buff, 20, "%.2f %.2f %.2f", results[0], results[1], results[2]);
-	return buff;
-}
-
 int
 main(void)
 {
-	char status[100];
-	char *load;
-	char *time;
-	char *version;
+	char status[STAT_LEN];
+	char load[LOAD_LEN];
+	char time[TIME_LEN];
+	char version[VRSN_LEN];
 	int  batt;
 	int  hasbatt = 1;
 
 	/* Only need to get version once */
-	version = getversion();
+	getversion(version);
 
 	/* getbatt() returns 0 if no battery exists */
-	if (getbatt() == 0)
+	if (getbatt(&batt) == 0)
 		hasbatt = 0;
 
 	for (;;sleep(10)) {
-		load = getload();
-		time = gettime();
+		getload(load);
+		gettime(time);
 
 		if (hasbatt) {
-			batt = getbatt();
-			snprintf(status, 100, "%s  L:%s  %s  %d%%",
+			getbatt(&batt);
+			snprintf(status, STAT_LEN, "%s  L:%s  %s  %d%%",
 					version, load, time, batt);
 		} else {
 			snprintf(status, 100, "%s  L:%s  %s",
@@ -156,11 +144,7 @@ main(void)
 		}
 
 		setstatus(status);
-		free(load);
-		free(time);
 	}
-
-	free(version);
 
 	return 0;
 }
