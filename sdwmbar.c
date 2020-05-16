@@ -39,6 +39,7 @@
 #define VRSN_LEN 10
 #define TIME_LEN 65
 #define LOAD_LEN 20
+#define AC_LEN 2
 
 void
 printerr(char *err) 
@@ -90,6 +91,16 @@ getbatt(int *buff)
 }
 
 void
+getac(char *buff)
+{
+	int ac;
+	size_t len = sizeof(ac);
+	sysctlbyname("hw.acpi.acline", &ac, &len, NULL, 0);
+	
+	*buff = (ac) ? '+' : '\0';
+}
+
+void
 getload(char *buff)
 {
 	double results[3];
@@ -120,6 +131,7 @@ main(void)
 	char load[LOAD_LEN];
 	char time[TIME_LEN];
 	char version[VRSN_LEN];
+	char ac[AC_LEN] = {0};
 	int  batt;
 	int  hasbatt = 1;
 
@@ -136,8 +148,9 @@ main(void)
 
 		if (hasbatt) {
 			getbatt(&batt);
-			snprintf(status, STAT_LEN, "%s  L:%s  %s  %d%%",
-					version, load, time, batt);
+			getac(ac);
+			snprintf(status, STAT_LEN, "%s  L:%s  %s  %s%d%%",
+					version, load, time, ac, batt);
 		} else {
 			snprintf(status, 100, "%s  L:%s  %s",
 					version, load, time);
