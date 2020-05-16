@@ -91,18 +91,13 @@ getbatt(int *buff)
 }
 
 void
-getac(char *ac)
+getac(char *buff)
 {
-	int buff;
-	size_t len = sizeof(buff);
-	sysctlbyname("hw.acpi.acline", &buff, &len, NULL, 0);
-
-	if (buff == 1) {
-		*ac = '+';
-		*(ac+1) = '\0';
-	} else {
-		*ac = '\0';
-	}
+	int ac;
+	size_t len = sizeof(ac);
+	sysctlbyname("hw.acpi.acline", &ac, &len, NULL, 0);
+	
+	*buff = (ac) ? '+' : '\0';
 }
 
 void
@@ -136,7 +131,7 @@ main(void)
 	char load[LOAD_LEN];
 	char time[TIME_LEN];
 	char version[VRSN_LEN];
-	char ac[AC_LEN];
+	char ac[AC_LEN] = {0};
 	int  batt;
 	int  hasbatt = 1;
 
