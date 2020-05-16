@@ -98,6 +98,9 @@ getac(char *buff)
 	sysctlbyname("hw.acpi.acline", &ac, &len, NULL, 0);
 	
 	*buff = (ac) ? '+' : '\0';
+
+	/* Ensure null termination */
+	*(buff+1) = '\0';
 }
 
 void
@@ -131,23 +134,18 @@ main(void)
 	char load[LOAD_LEN];
 	char time[TIME_LEN];
 	char version[VRSN_LEN];
-	char ac[AC_LEN] = {0};
+	char ac[AC_LEN];
 	int  batt;
-	int  hasbatt = 1;
 
 	/* Only need to get version once */
 	getversion(version);
-
-	/* getbatt() returns 0 if no battery exists */
-	if (getbatt(&batt) == 0)
-		hasbatt = 0;
 
 	for (;;sleep(10)) {
 		getload(load);
 		gettime(time);
 
-		if (hasbatt) {
-			getbatt(&batt);
+		/* getbatt() returns 0 if no battery exists */
+		if (getbatt(&batt)) {
 			getac(ac);
 			snprintf(status, STAT_LEN, "%s  L:%s  %s  %s%d%%",
 					version, load, time, ac, batt);
