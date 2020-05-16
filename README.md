@@ -8,7 +8,7 @@ Made to work with FreeBSD, may work on other BSD systems
 Currently shows load averages, date-time and battery life.
 
 ## License
-Copyright 2019 Sergei Akhmatdinov
+Copyright 2020 Sergei Akhmatdinov
 
 Licensed under the Apache License, Version 2.0 (the "License");
 See the LICENSE file for more information.
