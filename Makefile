@@ -14,8 +14,7 @@ clean:
 	rm -rf ${PROJECT}
 
 install:
-	cp -f ${PROJECT} ${PREFIX}/bin/
-	chmod 755 ${PREFIX}/bin/${PROJECT}
+	install ${PROJECT} ${PREFIX}/bin/${PROJECT}
 
 uninstall:
 	rm -rf ${PREFIX}/bin/${PROJECT}
