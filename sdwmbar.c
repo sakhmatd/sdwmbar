@@ -85,15 +85,15 @@ gettime(void)
 int
 getbatt(void)
 {
-	int buff[1];
-	size_t len = 1;
-	int ret = sysctlbyname("hw.acpi.battery.life", buff, &len, NULL, 0);
+	int buff = 0;
+	size_t len = sizeof(buff);
+	int ret = sysctlbyname("hw.acpi.battery.life", &buff, &len, NULL, 0);
 	
 	if (ret < 0) {
 		fprintf(stderr, "WARN: No battery was detected.\n");
 		return 0;
 	} else {
-		return *buff;
+		return buff;
 	}
 }
 
