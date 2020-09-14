@@ -35,7 +35,7 @@
 /* Needed to set the statusbar */
 #include <X11/Xlib.h>
 
-#define STAT_LEN 50
+#define STAT_LEN 75
 #define VRSN_LEN 10
 #define TIME_LEN 65
 #define LOAD_LEN 20
@@ -83,7 +83,6 @@ getbatt(int *buff)
 	int ret = sysctlbyname("hw.acpi.battery.life", buff, &len, NULL, 0);
 
 	if (ret < 0) {
-		fprintf(stderr, "WARN: No battery was detected.\n");
 		return 0;
 	} else {
 		return 1;
@@ -140,6 +139,9 @@ main(void)
 
 	/* Only need to get version once */
 	getversion(version);
+
+	if (!getbatt(&batt))
+		fprintf(stderr, "WARN: No battery was detected.\n");
 
 	for (;;sleep(10)) {
 		getload(load);
