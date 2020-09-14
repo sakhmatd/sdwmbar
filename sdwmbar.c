@@ -35,7 +35,7 @@
 /* Needed to set the statusbar */
 #include <X11/Xlib.h>
 
-#define STAT_LEN 100
+#define STAT_LEN 50
 #define VRSN_LEN 10
 #define TIME_LEN 65
 #define LOAD_LEN 20
@@ -148,11 +148,11 @@ main(void)
 		/* getbatt() returns 0 if no battery exists */
 		if (getbatt(&batt)) {
 			getac(ac);
-			snprintf(status, STAT_LEN, "%s	L:%s  %s  %s%d%%",
+			snprintf(status, STAT_LEN, "%s  L:%s  %s  %s%d%%",
 					version, load, time, ac, batt);
 		} else {
-			snprintf(status, 100, "%s  L:%s	 %s",
-					version, load, time);
+			snprintf(status, STAT_LEN, "%s  L:%s  %s",
+					 version, load, time);
 		}
 
 		setstatus(status);
