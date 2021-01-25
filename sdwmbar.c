@@ -31,6 +31,11 @@
 /* Needed for getbatt() */
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#ifdef __OpenBSD__
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <machine/apmvar.h>
+#endif /* __OpenBSD__ */
 
 /* Needed to set the statusbar */
 #include <X11/Xlib.h>
@@ -40,6 +45,11 @@
 #define TIME_LEN 65
 #define LOAD_LEN 20
 #define AC_LEN 2
+
+#ifdef __OpenBSD__
+/* /dev/apm file descriptor */
+int apmfd;
+#endif /* __OpenBSD__ */
 
 void
 printerr(char *err)
@@ -79,6 +89,19 @@ gettime(char *buff)
 int
 getbatt(int *buff)
 {
+#ifdef __OpenBSD__
+	struct apm_power_info pinfo;
+
+	if (ioctl(apmfd, APM_IOC_GETPOWER, &pinfo) < 0)
+		printerr("sdwmbar: unable to get power state");
+
+	if (pinfo.battery_state == APM_BATTERY_ABSENT) {
+		return 0;
+	} else {
+		*buff = pinfo.battery_life;
+		return 1;
+	}
+#else
 	size_t len = sizeof(buff);
 	int ret = sysctlbyname("hw.acpi.battery.life", buff, &len, NULL, 0);
 
@@ -87,6 +110,7 @@ getbatt(int *buff)
 	} else {
 		return 1;
 	}
+#endif /* __OpenBSD__ */
 }
 
 void
@@ -136,6 +160,12 @@ main(void)
 	char version[VRSN_LEN];
 	char ac[AC_LEN];
 	int  batt;
+
+#ifdef __OpenBSD__
+	apmfd = open("/dev/apm", O_RDONLY);
+	if (apmfd < 0)
+		printerr("sdwmbar: unable to get apm file descriptor");
+#endif
 
 	/* Only need to get version once */
 	getversion(version);
