@@ -116,12 +116,20 @@ getbatt(int *buff)
 void
 getac(char *buff)
 {
+#ifdef __OpenBSD__
+	struct apm_power_info pinfo;
+
+	if (ioctl(apmfd, APM_IOC_GETPOWER, &pinfo) < 0)
+		printerr("sdwmbar: unable to get power state");
+
+	*buff = (pinfo.ac_state == APM_AC_ON) ? '+' : '\0';
+#else
 	int ac;
 	size_t len = sizeof(ac);
 	sysctlbyname("hw.acpi.acline", &ac, &len, NULL, 0);
 
 	*buff = (ac) ? '+' : '\0';
-
+#endif
 	/* Ensure null termination */
 	*(buff+1) = '\0';
 }
