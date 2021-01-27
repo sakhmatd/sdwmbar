@@ -2,16 +2,15 @@ PROJECT = sdwmbar
 CC = cc
 
 PREFIX = /usr/local
+XPREFIX = /usr/local
 
-OS != uname -s
+OS != uname
 .if ${OS} == OpenBSD
-INCS  = -I/usr/X11R6/include
-LINKS = -L/usr/X11R6/lib -lX11
-.else
-INCS  = -I/usr/local/include
-LINKS = -L/usr/local/lib -lX11
+XPREFIX = /usr/X11R6
 .endif
 
+INCS   = -I${XPREFIX}/include
+LINKS  = -L${XPREFIX}/lib -lX11
 CFLAGS = -std=c99 -pedantic -Wall -Werror ${INCS} ${LINKS}
 
 all:
