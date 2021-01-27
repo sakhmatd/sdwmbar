@@ -208,6 +208,7 @@ main(void)
 		setstatus(status);
 	}
 
+	close(apmfd);
 	return 0;
 }
 
