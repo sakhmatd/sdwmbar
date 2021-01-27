@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #ifdef __OpenBSD__
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <machine/apmvar.h>
@@ -159,6 +160,13 @@ setstatus(char *status)
 	XCloseDisplay(display);
 }
 
+void
+handle_sigint(int sig)
+{
+	close(apmfd);
+	exit(0);
+}
+
 int
 main(void)
 {
@@ -173,6 +181,8 @@ main(void)
 	apmfd = open("/dev/apm", O_RDONLY);
 	if (apmfd < 0)
 		printerr("sdwmbar: unable to get apm file descriptor");
+
+	signal(SIGINT, handle_sigint);
 #endif
 
 	/* Only need to get version once */
