@@ -130,7 +130,7 @@ getac(char *buff)
 	sysctlbyname("hw.acpi.acline", &ac, &len, NULL, 0);
 
 	*buff = (ac) ? '+' : '\0';
-#endif
+#endif /* __OpenBSD__ */
 	/* Ensure null termination */
 	*(buff+1) = '\0';
 }
@@ -160,12 +160,14 @@ setstatus(char *status)
 	XCloseDisplay(display);
 }
 
+#ifdef __OpenBSD__
 void
 handle_sigint(int sig)
 {
 	close(apmfd);
 	exit(0);
 }
+#endif /* __OpenBSD__ */
 
 int
 main(void)
@@ -183,7 +185,7 @@ main(void)
 		printerr("sdwmbar: unable to get apm file descriptor");
 
 	signal(SIGINT, handle_sigint);
-#endif
+#endif /* __OpenBSD__ */
 
 	/* Only need to get version once */
 	getversion(version);
@@ -208,7 +210,10 @@ main(void)
 		setstatus(status);
 	}
 
+#ifdef __OpenBSD__
 	close(apmfd);
+#endif /* __OpenBSD__ */
+
 	return 0;
 }
 
