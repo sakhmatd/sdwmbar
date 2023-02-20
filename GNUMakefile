@@ -1,0 +1,49 @@
+PROJECT = sdwmbar
+PREFIX ?= /usr/local
+INSTALL ?= install
+
+CC ?= cc
+
+LIBS = -lX11
+
+CFLAGS += -std=c99
+CFLAGS += -pedantic
+CFLAGS += -Wall
+CFLAGS += -Wextra
+CFLAGS += -Wstrict-prototypes
+CFLAGS += -O2
+
+CFLAGS += -D_DEFAULT_SOURCE
+
+LDFLAGS = ${LIBS}
+
+all:
+	${CC} ./${PROJECT}-linux.c ${CFLAGS} ${LDFLAGS} -o ./${PROJECT}
+
+debug:
+	${CC} ./${PROJECT}-linux.c ${CFLAGS} -g ${LDFLAGS} -o ./${PROJECT}
+
+gdb: debug
+	gdb ./${PROJECT}
+
+memcheck: debug
+	valgrind --leak-check=yes ./${PROJECT}
+
+memcheck_v: debug
+	valgrind --leak-check=yes -v ./${PROJECT}
+
+memcheck_full: debug
+	valgrind --leak-check=full --show-leak-kinds=debug ./${PROJECT}
+
+clean:
+	rm -f ./${PROJECT}
+
+install:
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	${INSTALL} ./${PROJECT} ${DESTDIR}${PREFIX}/bin/${PROJECT}
+
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/${PROJECT}
+	rmdir --ignore-fail-on-non-empty ${DESTDIR}${PREFIX}/bin
+
+.PHONY: all debug gdb memcheck memcheck_v memcheck_full clean install uninstall
