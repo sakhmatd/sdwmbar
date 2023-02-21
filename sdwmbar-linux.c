@@ -48,7 +48,7 @@ static void set_status(char *status);
 void
 printerr(char *msg)
 {
-	fprintf(stderr, "undwmbar: %s; errno: %s\n", msg, strerror(errno));
+	fprintf(stderr, "sdwmbar: %s; errno: %s\n", msg, strerror(errno));
 	exit(-1);
 }
 
