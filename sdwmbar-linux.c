@@ -62,7 +62,7 @@ getversion(char *buff)
 		printerr("sdwmbar: no dwm binary found!");
 
 	fgets(buff, VRSN_LEN, fp);
-	fclose(fp);
+	pclose(fp);
 
 	/* Remove the trailing newline */
 	buff[strcspn(buff, "\n")] = 0;
